@@ -1,0 +1,13 @@
+# IDE
+.idea/
+
+# Docker
+.env
+.env.prod
+
+# Backend
+.fstore_env/
+__pycache__/
+
+# Frontend
+node_modules/

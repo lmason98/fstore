@@ -12,35 +12,35 @@ export const useAlert = () => {
 };
 
 function AlertProvider({ children }) {
-    const [open, setOpen] = useState(false)
-    const [message, setMessage] = useState('')
-    const [severity, setSeverity] = useState('info')
+  const [open, setOpen] = useState(false)
+  const [message, setMessage] = useState('')
+  const [severity, setSeverity] = useState('info')
   
-    const showAlert = (newMessage, newSeverity = 'info') => {
-      setMessage(newMessage)
-      setSeverity(newSeverity)
-      setOpen(true)
-    }
+  const showAlert = (newMessage, newSeverity = 'info') => {
+    setMessage(newMessage)
+    setSeverity(newSeverity)
+    setOpen(true)
+  }
   
-    const hideAlert = () => {
-      setOpen(false)
-    }
+  const hideAlert = () => {
+    setOpen(false)
+  }
   
-    return (
-      <AlertContext.Provider value={showAlert}>
-        {children}
-        <Snackbar
-          open={open}
-          autoHideDuration={6000}
-          onClose={hideAlert}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        >
-            <Alert severity={severity}>
-              {message}
-            </Alert>
-        </Snackbar>
-      </AlertContext.Provider>
-    )
+  return (
+    <AlertContext.Provider value={showAlert}>
+      {children}
+      <Snackbar
+        open={open}
+        autoHideDuration={6000}
+        onClose={hideAlert}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity={severity}>
+          {message}
+        </Alert>
+      </Snackbar>
+    </AlertContext.Provider>
+  )
 }
 
 export default AlertProvider

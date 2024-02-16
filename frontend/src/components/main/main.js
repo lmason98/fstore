@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, Typography, CircularProgress, Button } from '@mui/material'
+import { Grid, Box, CircularProgress } from '@mui/material'
 
 import { useAlert } from '../alert/alert'
 import Login from '../login/login'
 import AuthService from '../../utils/auth'
-import api from '../../utils/api'
+import Navigation from "../navigation/navigation";
 
 const authService = new AuthService()
 
@@ -48,21 +48,7 @@ function Main() {
         </Box>
       :
         authed ?
-          <Grid
-            container
-            spacing={0}
-            direction='column'
-            alignItems='center'
-            justifyContent='center'
-            sx={{display: 'flex', height: '100vh', backgroundColor: '#eaeaea'}}
-          >
-            <Grid item>
-              <Typography sx={{margin: 'auto auto'}}>You are authed!</Typography>
-            </Grid>
-            <Grid item>
-              <Button variant='contained' onClick={doLogout}>Logout</Button>
-            </Grid>
-          </Grid>
+          <Navigation logout={doLogout} />
         :
           <Grid
             container

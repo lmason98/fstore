@@ -17,11 +17,14 @@ Including another URLconf
 from rest_framework_simplejwt.views import TokenRefreshView
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 
 from auth.views import TokenObtainView, TokenCheckPairView
 
 urlpatterns = [
+
+    # Upload
+    path('api/', include('main.urls')),
 
     # Auth
     path('api/auth/token/obtain', TokenObtainView.as_view()),

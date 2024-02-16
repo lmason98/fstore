@@ -29,7 +29,6 @@ api.interceptors.response.use(resp => {
   return resp
 }, error => {
   if (error.response) {
-    console.log('error.response :', error.response)
     if (401 === error.response.status)
       error.response['data'] = {message: error.response.data?.message}
     else if (403 === error.response.status)
@@ -67,7 +66,6 @@ class AuthService {
   check() {
     return api.get('/auth/token/check')
       .then(resp => {
-        console.log('check reps :', resp)
         if (resp.data.status === 'success')
           return Promise.resolve(resp)
         else

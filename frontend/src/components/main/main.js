@@ -4,7 +4,7 @@ import { Grid, Box, CircularProgress } from '@mui/material'
 import { useAlert } from '../alert/alert'
 import Login from '../login/login'
 import AuthService from '../../utils/auth'
-import Navigation from "../navigation/navigation";
+import Navigation from '../navigation/navigation'
 
 const authService = new AuthService()
 

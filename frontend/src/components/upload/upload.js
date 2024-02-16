@@ -1,4 +1,4 @@
-import {useState} from "react";
+import { useState } from "react";
 import api from "../../utils/api";
 
 
@@ -13,7 +13,7 @@ function Upload() {
 
   const handleUploadClick = () => {
     if (!file) {
-      return;
+      return
     }
 
     let formData = new FormData()

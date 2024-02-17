@@ -20,8 +20,7 @@ RUN mkdir /api/staticfiles
 # Set api directory to working directory
 WORKDIR /api
 
-# Copy project files to /api
-COPY . /api/
+# Copy entrypoint to /api
 COPY ./entrypoint.sh /api/entrypoint.sh
 RUN chmod +x /api/entrypoint.sh
 RUN chown -R fstore:fstore /api/
@@ -30,7 +29,10 @@ RUN chown -R fstore:fstore /api/
 USER fstore
 
 # Install requirements
+COPY ./requirements.txt /api/requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+# Copy project over
+COPY . /api/
 
 CMD ["./entrypoint.sh"]

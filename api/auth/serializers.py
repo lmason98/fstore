@@ -22,6 +22,7 @@ class TokenObtainLifetimeSerializer(TokenObtainPairSerializer):
 					'refresh': str(token),
 					'access': str(token.access_token),
 					'userId': user.id,
+					'userName': str(user),
 					'message': f'Successfully logged in {user}',
 					'status': 'success'
 				}

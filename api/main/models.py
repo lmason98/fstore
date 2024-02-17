@@ -46,3 +46,6 @@ class Blob(CreateUpdatedMixin):
 
 	def get_dir_name(self):
 		pass
+
+	def upload(self, file_data):
+		pass

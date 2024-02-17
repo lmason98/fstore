@@ -1,11 +1,8 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from azure_storage.main import AzureStorage
 from .models import Folder, Blob
 from .serializers import FolderSerializer, BlobSerializer
-
-az_storage = AzureStorage()
 
 
 class BaseAPIView(APIView):
@@ -119,10 +116,6 @@ class FileView(BaseAPIView):
 		Delete file
 		"""
 		obj_id = kwargs.get('id')
-
-		print('obj id :', obj_id)
-		for b in Blob.objects.all():
-			print('b :', b, b.id)
 
 		try:
 			Blob.objects.get(owner_id=request.user.id, id=obj_id).delete()

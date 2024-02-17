@@ -11,7 +11,9 @@ import {
   Typography
 } from '@mui/material'
 import ListIcon from '@mui/icons-material/List'
+
 import Content from '../content/content'
+import { getUserName } from '../../utils/auth'
 
 const drawerWidth = 240
 
@@ -46,7 +48,7 @@ function Navigation({ logout }) {
             </ListItem>
           ))}
           <ListItem sx={{marginTop: 'auto', display: 'flex'}}>
-            <Button sx={{margin: 'auto auto'}} variant='contained' onClick={logout}>Logout</Button>
+            <Button sx={{margin: 'auto auto'}} variant='contained' onClick={logout}>Logout {getUserName()}</Button>
           </ListItem>
         </List>
       </Drawer>

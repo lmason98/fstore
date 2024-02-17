@@ -1,8 +1,10 @@
 import { useState } from "react";
 import api from "../../utils/api";
+import {useAlert} from "../alert/alert";
 
 
 function Upload() {
+  const doAlert = useAlert()
 
   const [file, setFile] = useState()
 
@@ -13,6 +15,7 @@ function Upload() {
 
   const handleUploadClick = () => {
     if (!file) {
+      doAlert('No file selected!', 'error')
       return
     }
 
@@ -21,10 +24,14 @@ function Upload() {
 
     api.post('/upload/', formData)
       .then(resp => {
-        console.log('api post resp :', resp)
+        if (resp.data.status === 'success')
+          doAlert(`Successfully uploaded ${file.name}`, 'success')
+        else
+          doAlert(resp.data.message, resp.data.status)
       })
       .catch(err => {
-        console.log('api post err :', err)
+        console.log('err :', err)
+        // doAlert(resp.data.message, resp.data.status)
       })
 
   };

@@ -9,7 +9,7 @@ import Navigation from '../navigation/navigation'
 const authService = new AuthService()
 
 function Main() {
-  const alert = useAlert()
+  const doAlert = useAlert()
 
   const [authed, setAuthed] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -17,7 +17,7 @@ function Main() {
   const doLogin = (user, pass) => {
     authService.login(user, pass)
       .then(resp => {
-        alert(resp.data.message, resp.data.status)
+        doAlert(resp.data.message, resp.data.status)
         setAuthed(true)
       })
       .catch(err => alert(err.data.message, err.data.status))

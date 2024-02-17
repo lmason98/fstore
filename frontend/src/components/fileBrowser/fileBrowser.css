@@ -1,0 +1,7 @@
+tr.body:hover {
+    background-color: #f6f6f6;
+}
+
+tr.body.folder:hover {
+    cursor: pointer;
+}

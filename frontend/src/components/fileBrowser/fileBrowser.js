@@ -9,19 +9,26 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material'
-import { Folder, InsertDriveFile, ArrowBack, Delete, Download } from '@mui/icons-material'
+import { Folder, InsertDriveFile, ArrowBack, Delete, Download, ContentCopy, DriveFileMove } from '@mui/icons-material'
 
 import './fileBrowser.css'
 import React, { useEffect, useState } from 'react'
 import api from "../../utils/api";
 import ActionList from "../actionList/actionList";
 import {useAlert} from "../alert/alert";
+import CopyMoveObjectModal from "../copyMoveObjectModal/copyMoveObjectModal";
 
 function FileBrowser({ location, refresh, enterFolder }) {
   const doAlert = useAlert()
 
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState([])
+  const [copy, setCopy] = useState(true)
+  const [options, setOptions] = useState([])
+  const [copyMoveModalOpen, setCopyMoveModalOpen] = useState(false)
+  const [copyMoveObjectId, setCopyMoveObjectId] = useState(-1)
+  const [copyMoveObjectType, setCopyMoveObjectType] = useState('')
+  const [copyMoveObjectName, setCopyMoveObjectName] = useState('')
 
   const getData = () => {
     setLoading(true)
@@ -29,6 +36,7 @@ function FileBrowser({ location, refresh, enterFolder }) {
     api.get(`/folder?location=${location}`)
       .then(resp => {
         setData(resp.data.objects)
+        setOptions(resp.data.options)
         setLoading(false)
       })
   }
@@ -70,7 +78,6 @@ function FileBrowser({ location, refresh, enterFolder }) {
             setData([...data.filter(obj => `${obj.id}${obj.type}` !== `${id}${type}`)])
         })
   }
-
   const downloadFile = (id, _, name) => {
     api.get(`/file/${id}/`, {responseType: 'blob'})
       .then(resp => {
@@ -84,14 +91,43 @@ function FileBrowser({ location, refresh, enterFolder }) {
         link.remove();
       })
   }
+  const openCopyMoveModal = (id, type, name, doCopy) => {
+    setCopy(doCopy)
+    setCopyMoveModalOpen(true)
+    setCopyMoveObjectId(id)
+    setCopyMoveObjectType(type)
+    setCopyMoveObjectName(name)
+  }
+  const closeCopyMoveModal = () => setCopyMoveModalOpen(false)
+  const copyMoveObject = (newLocation) => {
+
+    console.log('copy move object :', copyMoveObjectId, copyMoveObjectType, copyMoveObjectName, newLocation)
+    const url = copyMoveObjectType === 'folder' ? '/folder' : '/file'
+
+    api.patch(`${url}/${copyMoveObjectId}/`,
+      {copy: copy, location: newLocation}
+    )
+      .then(resp => {
+        doAlert(resp.data.message, resp.data.status)
+
+        if (resp.data.status === 'success')
+          closeCopyMoveModal()
+      })
+
+  }
 
   const generateActions = (type) => {
     let actions = [
       {fn: deleteObject, text: 'Delete', icon: <Delete />},
     ]
 
-    if (type === 'file')
-      actions.push({fn: downloadFile, text: 'Download', icon: <Download />})
+    if (type === 'file') {
+      actions.unshift({fn: (id, type, name) => openCopyMoveModal(id, type, name, true),
+        text: 'Copy', icon: <ContentCopy />})
+      actions.unshift({fn: (id, type, name) => openCopyMoveModal(id, type, name, false),
+        text: 'Move', icon: <DriveFileMove />})
+      actions.unshift({fn: downloadFile, text: 'Download', icon: <Download />})
+    }
 
     return actions
   }
@@ -147,6 +183,10 @@ function FileBrowser({ location, refresh, enterFolder }) {
             </TableBody>
           </Table>
         </TableContainer>
+
+        <CopyMoveObjectModal copy={copy} curLocation={location} open={copyMoveModalOpen}
+                             handleClose={closeCopyMoveModal} handleSubmit={copyMoveObject}
+                             options={copy ? options : options.filter(opt => opt.text !== location)} />
       </>
   )
 }

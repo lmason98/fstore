@@ -1,6 +1,6 @@
-from azure.core.exceptions import ResourceExistsError
+from azure.core.exceptions import ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobServiceClient, BlobClient
 
 
 class AzureStorage:
@@ -9,7 +9,8 @@ class AzureStorage:
 	credentials = DefaultAzureCredential()
 
 	def __init__(self):
-		self.client = BlobServiceClient(self.url, credential=self.credentials)
+		self.client = BlobServiceClient(self.url, credential=self.credentials,
+										)
 
 	def create_container(self, container_name):
 		"""
@@ -38,14 +39,25 @@ class AzureStorage:
 	def upload_file(self, user, filename, file_data):
 		blob = self.get_blob(user, filename)
 
+		print('pre upload 2')
 		blob.upload_blob(file_data)
-
-	def delete_file(self, user, filename):
-		blob = self.get_blob(user, filename)
-		blob.delete_blob()
 
 	def download_file(self, user, filename):
 		blob = self.get_blob(user, filename)
 		file_data = blob.download_blob().readall()
 
 		return file_data
+
+	def delete_file(self, user, filename):
+		blob = self.get_blob(user, filename)
+
+		try:
+			blob.delete_blob()
+		except ResourceNotFoundError:
+			pass
+
+	def copy_file(self, user, filename, new_filename):
+		source_blob = self.get_blob(user, filename)
+		dest_blob = self.get_blob(user, new_filename)
+
+		dest_blob.upload_blob_from_url(source_url=source_blob.url, overwrite=False)

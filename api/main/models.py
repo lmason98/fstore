@@ -1,3 +1,5 @@
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.db import models
 from django.conf import settings
 
@@ -26,18 +28,27 @@ class Folder(CreateUpdatedMixin):
 	def __str__(self):
 		return self.name
 
+	def option_name(self):
+		if self.is_user_root():
+			name = '/'
+		else:
+			name = self.name
+
+		return name
+
 	def save(self, *args, **kwargs):
 
 		# On create, if no parent (root) folder, create container in azure storage
-		if not self.pk and not self.parent and self.owner.username != 'testuser':
+		if not self.pk and self.parent is None and self.owner.username != 'testuser':
 			az_storage.create_container(self.name)
 
 		super().save(*args, **kwargs)
 
 	def delete(self, *args, **kwargs):
 
-		# On user delete, delete container in azure storage
-		az_storage.delete_container(self.name)
+		# On root folder delete, delete container in azure storage
+		if self.parent is None and self.owner.username != 'testuer':
+			az_storage.delete_container(self.name)
 
 		super().delete(*args, **kwargs)
 
@@ -64,12 +75,8 @@ class Blob(CreateUpdatedMixin):
 	name = models.CharField(blank=False, null=False, max_length=255)
 	size = models.IntegerField(blank=False, null=False)
 
-	def delete(self, *args, **kwargs):
-		az_storage.delete_file(self.owner, self.name)
-
-		super().delete(*args, **kwargs)
-
 	def upload(self, file_data):
+		print('pre upload 1')
 		az_storage.upload_file(self.owner, self.path_name(), file_data)
 
 	def download(self):
@@ -88,3 +95,19 @@ class Blob(CreateUpdatedMixin):
 			name = self.name
 
 		return name
+
+	def size_display(self):
+		sizes = ['B', 'KB', 'MB', 'GB']
+		size = self.size
+
+		i = 0
+		while size > 1024:
+			size /= 1024
+			i += 1
+
+		return f'{round(size)} {sizes[i]}'
+
+
+@receiver(pre_delete, sender=Blob, dispatch_uid='blob_delete_signal')
+def pre_blob_delete(sender, instance, using, **kwargs):
+	az_storage.delete_file(instance.owner, instance.path_name())

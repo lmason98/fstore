@@ -14,6 +14,17 @@ class MainTestCase(TestCase):
 	Set username to testuser to not create containers
 	"""
 
+	def test_folder_path(self):
+
+		user = User.objects.create(username='testuser', email='t@g.com')
+		f1 = Folder.objects.create(owner=user, name='f1')
+		f2 = Folder.objects.create(owner=user, name='f2', parent=f1)
+		f3 = Folder.objects.create(owner=user, name='f3', parent=f2)
+
+		self.assertTrue(f3.path(), 'f1/f2/f3/')
+		self.assertTrue(f2.path(), 'f1/f2/')
+		self.assertTrue(f1.path(), 'f1/')
+
 	def test_azure_container_create_delete(self):
 
 		user = User.objects.create(username='testuser1', email='t@g.com')
@@ -31,7 +42,7 @@ class MainTestCase(TestCase):
 		file_data = b'Hello World!'
 
 		user = User.objects.create(username='testuser2', email='t@g.com')
-		folder = Folder.objects.create(owner=user, name=user.username)  # Create root folder
+		folder = Folder.objects.create(owner=user, name=user.username)  # Create user root container
 		blob = Blob.objects.create(owner=user, parent=folder, name='test.txt', size=len(file_data))
 
 		blob.upload(file_data)  # Creates and uploads to az blob
@@ -39,18 +50,31 @@ class MainTestCase(TestCase):
 
 		downloaded_file_data = blob.download()
 
+		self.assertEqual(file_data, downloaded_file_data)
+
 		blob.delete()  # Deletes az blob as well
 		self.assertFalse(az_storage.get_blob(user, 'test.txt').exists())
 
-		folder.delete()
+		folder.delete()  # Delete user root container
 
-	def test_folder_path(self):
-
-		user = User.objects.create(username='testuser', email='t@g.com')
-		f1 = Folder.objects.create(owner=user, name='f1')
+	def test_azure_nested_blob_create_delete(self):
+		"""
+		Creates nested folder structure, uploads file to folder, ensures folder delete also deletes blob
+		"""
+		file_data = b'Hello World!'
+		user = User.objects.create(username='testuser3', email='t@g.com')
+		folder = Folder.objects.create(owner=user, name=user.username)  # Create user root container
+		f1 = Folder.objects.create(owner=user, name='f1', parent=folder)
 		f2 = Folder.objects.create(owner=user, name='f2', parent=f1)
 		f3 = Folder.objects.create(owner=user, name='f3', parent=f2)
 
-		self.assertTrue(f3.path(), 'f1/f2/f3/')
-		self.assertTrue(f2.path(), 'f1/f2/')
-		self.assertTrue(f1.path(), 'f1/')
+		blob = Blob.objects.create(owner=user, parent=f3, name='test.txt', size=len(file_data))
+		blob.upload(file_data)
+
+		self.assertTrue(az_storage.get_blob(user, 'f1/f2/f3/test.txt').exists())
+
+		# Should cascade and delete f2, f3 and blob
+		f1.delete()
+		self.assertFalse(az_storage.get_blob(user, 'f1/f2/f3/test.txt').exists())
+
+		folder.delete()  # Delete user root container

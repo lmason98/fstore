@@ -23,7 +23,7 @@ function Login({ doLogin }) {
             <TextField sx={{width: '100%'}} label='Username' value={user} onChange={handleUser} />
           </Grid>
           <Grid item xs={12}>
-            <TextField sx={{width: '100%'}} label='Password' value={pass} onChange={handlePass} />
+            <TextField sx={{width: '100%'}} label='Password' value={pass} type='password' onChange={handlePass} />
           </Grid>
         </Grid>
       </CardContent>

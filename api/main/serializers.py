@@ -28,7 +28,7 @@ class FolderSerializer(BaseDataSerializer):
 class BlobSerializer(BaseDataSerializer):
 
 	type = SerializerMethodField('get_type')
-	size = IntegerField()
+	size = CharField(source='size_display')
 
 	class Meta:
 		fields = BaseDataSerializer.Meta.fields + ('type', 'size')

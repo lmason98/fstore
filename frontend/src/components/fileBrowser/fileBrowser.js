@@ -9,7 +9,7 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material'
-import { Folder, InsertDriveFile, ArrowBack, Delete } from '@mui/icons-material'
+import { Folder, InsertDriveFile, ArrowBack, Delete, Download } from '@mui/icons-material'
 
 import './fileBrowser.css'
 import React, { useEffect, useState } from 'react'
@@ -71,10 +71,27 @@ function FileBrowser({ location, refresh, enterFolder }) {
         })
   }
 
-  const generateActions = () => {
+  const downloadFile = (id, _, name) => {
+    api.get(`/file/${id}/`, {responseType: 'blob'})
+      .then(resp => {
+        console.log(resp.data);
+        const downloadUrl = window.URL.createObjectURL(new Blob([resp.data]));
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.setAttribute('download', name);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      })
+  }
+
+  const generateActions = (type) => {
     let actions = [
       {fn: deleteObject, text: 'Delete', icon: <Delete />},
     ]
+
+    if (type === 'file')
+      actions.push({fn: downloadFile, text: 'Download', icon: <Download />})
 
     return actions
   }
@@ -122,7 +139,7 @@ function FileBrowser({ location, refresh, enterFolder }) {
                     </TableCell>
                     <TableCell align='right'>
                       <ActionList objectInfo={{id: object.id, type: object.type, name: object.name}}
-                                  actions={generateActions()} />
+                                  actions={generateActions(object.type)} />
                     </TableCell>
                   </TableRow>
                 ))

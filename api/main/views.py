@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -25,8 +26,6 @@ class FolderView(BaseAPIView):
 		Gets a list of folders and files with parent location
 		"""
 		location = request.GET.get('location')
-
-		print('location :', location.split('/'))
 
 		filter_args = {
 			'owner_id': request.user.id,
@@ -78,43 +77,67 @@ class FolderView(BaseAPIView):
 
 class FileView(BaseAPIView):
 	"""
-	Handle file upload
+	Handle file upload, download, delete, etc.
 	"""
+
+	content_types = {
+		'txt': 'text/plain',
+		'png': 'image/png',
+		'jpg': 'image/jpg',
+		'jpeg': 'image/jpg',
+		'pdf': 'application/pdf',
+	}
+
+	def get(self, request, *args, **kwargs):
+		"""
+		Downloads a file
+		"""
+		obj_id = kwargs.get('id')
+
+		try:
+			blob = Blob.objects.get(owner_id=request.user.id, id=obj_id)
+			ext = blob.name.split('.')[-1]
+			file_data = blob.download()
+
+			resp = HttpResponse(file_data, content_type=self.content_types[ext.lower()])
+			resp['Content-Disposition'] = f'attachment; filename={blob.name}'
+		except Blob.DoesNotExist:
+			resp = Response({'status': 'error', 'message': 'File not found.'})
+
+		return resp
 
 	def post(self, request, *args, **kwargs):
 		location = request.data.get('location')
-		file = request.data.get('files')
+		file_data = request.data.get('files')
 
-		print('file :', file, type(file), f'size={file.size}')
 		location = self.get_folder(location)
-
-		print('parent folder :', location)
 
 		if not location:
 			resp = {'status': 'error', 'message': 'Missing parent folder.'}
-		elif Blob.objects.filter(owner_id=self.request.user.id, parent=location, name=str(file)).count() > 0:
-			resp = {'status': 'error', 'message': 'This file already exists.'}
-		elif not file:
+		elif not file_data:
 			resp = {'status': 'error', 'message': 'Missing file.'}
 		else:
 			data = {
 				'owner_id': request.user.id,
 				'parent': location,
-				'name': str(file),
-				'size': file.size,
+				'name': str(file_data),
 			}
-			# az_storage.upload_file(str(file), file)
-			blob = Blob.objects.create(**data)
+			existing = Blob.objects.filter(**data).count()
 
-			resp = {'status': 'success', 'message': f'Successfully uploaded {str(file)}'}
+			data['size'] = file_data.size
+			if existing > 0:
+				split_name = data['name'].split('.')
+				data['name'] = f'{split_name[0]}({existing}).{split_name[1]}'
+
+			blob = Blob.objects.create(**data)
+			blob.upload(file_data)
+
+			resp = {'status': 'success', 'message': f'Successfully uploaded {str(file_data)}'}
 
 		return Response(resp)
 
 	@staticmethod
 	def delete(request, *args, **kwargs):
-		"""
-		Delete file
-		"""
 		obj_id = kwargs.get('id')
 
 		try:

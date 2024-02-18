@@ -1,3 +1,4 @@
+from azure.core.exceptions import ResourceExistsError
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 
@@ -19,6 +20,32 @@ class AzureStorage:
 		if not container.exists():
 			container.create_container()
 
-	def upload_file(self, user, filename, file):
-		blob_client = self.client.get_blob_client(container=user.username, blob=filename)
-		blob_client.upload_blob(file)
+	def delete_container(self, container_name):
+		container = self.client.get_container_client(container=container_name)
+
+		if container.exists():
+			container.delete_container()
+
+	def get_container(self, container_name):
+		container = self.client.get_container_client(container=container_name)
+
+		if container.exists():
+			return container
+
+	def get_blob(self, user, filename):
+		return self.client.get_blob_client(container=user.username, blob=filename)
+
+	def upload_file(self, user, filename, file_data):
+		blob = self.get_blob(user, filename)
+
+		blob.upload_blob(file_data)
+
+	def delete_file(self, user, filename):
+		blob = self.get_blob(user, filename)
+		blob.delete_blob()
+
+	def download_file(self, user, filename):
+		blob = self.get_blob(user, filename)
+		file_data = blob.download_blob().readall()
+
+		return file_data

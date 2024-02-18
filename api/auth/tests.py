@@ -1,20 +1,18 @@
-from django.test import TestCase
 from django.contrib.auth.models import User
-from rest_framework import status
 from rest_framework.test import APITestCase
 
-# Create your tests here.
+
 class BaseAPICase(APITestCase):
 	""" Base test case for api tests """
 
 	def setUp(self):
 		# Create new user
-		self.user = User.objects.create(email='test@gmail.com', username='test')
+		self.user = User.objects.create(email='test@gmail.com', username='testuser')
 		self.user.set_password('testtest')
 		self.user.save()
 
 		# Login test client
-		self.client.login(username='test', password='testtest')
+		self.client.login(username='testuser', password='testtest')
 		self.do_auth()
 
 	def tearDown(self):
@@ -24,7 +22,7 @@ class BaseAPICase(APITestCase):
 
 	def do_auth(self):
 		url = '/api/auth/token/obtain'
-		resp = self.query_api(self.client.post, url, data={'username': 'test', 'password': 'testtest'})
+		resp = self.query_api(self.client.post, url, data={'username': 'testuser', 'password': 'testtest'})
 
 		self.token = resp.data.get('access')
 		self.refresh_token = resp.data.get('refresh')
@@ -64,7 +62,7 @@ class APIAuthCase(BaseAPICase):
 
 	def test_login_fail_password(self):
 		url = '/api/auth/token/obtain'
-		response = self.query_api(self.client.post, url, data={'username': 'test', 'password': 'test'})
+		response = self.query_api(self.client.post, url, data={'username': 'testuser', 'password': 'test'})
 
 		self.assertEqual(response.data.get('status'), 'error')
 		self.assertEqual(response.data.get('message'), f'Invalid password for {self.user.username}')

@@ -16,7 +16,6 @@ function ActionList({ objectInfo, actions }) {
       <Button
         startIcon={<ExpandMore />}
         variant='contained'
-        size='small'
         aria-controls={open ? 'basic-menu' : undefined}
         aria-haspopup='true'
         aria-expanded={open ? 'true' : undefined}

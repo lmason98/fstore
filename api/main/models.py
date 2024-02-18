@@ -48,7 +48,7 @@ class Folder(CreateUpdatedMixin):
 		path = [self.name]
 
 		cur = self
-		while not cur.parent.is_user_root():
+		while cur.parent and not cur.parent.is_user_root():
 			cur = cur.parent
 			path.append(cur.name)
 

@@ -32,7 +32,7 @@ jobs:
         docker push ${{ env.REGISTRY_URL }}/api-${{ env.PROJECT_NAME }}:${{ github.sha }}
         docker build -t ${{ env.REGISTRY_URL }}/front-${{ env.PROJECT_NAME }}:${{ github.sha }} -f ./nginx/Dockerfile.prod .
         docker push ${{ env.REGISTRY_URL }}/front-${{ env.PROJECT_NAME }}:${{ github.sha }}
-    - env:
+      env:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         DEBUG: 0
         ALLOWED_HOSTS: fstore

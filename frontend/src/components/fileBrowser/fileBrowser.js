@@ -101,7 +101,6 @@ function FileBrowser({ location, refresh, enterFolder }) {
   const closeCopyMoveModal = () => setCopyMoveModalOpen(false)
   const copyMoveObject = (newLocation) => {
 
-    console.log('copy move object :', copyMoveObjectId, copyMoveObjectType, copyMoveObjectName, newLocation)
     const url = copyMoveObjectType === 'folder' ? '/folder' : '/file'
 
     api.patch(`${url}/${copyMoveObjectId}/`,
@@ -110,8 +109,10 @@ function FileBrowser({ location, refresh, enterFolder }) {
       .then(resp => {
         doAlert(resp.data.message, resp.data.status)
 
-        if (resp.data.status === 'success')
+        if (resp.data.status === 'success') {
           closeCopyMoveModal()
+          getData()
+        }
       })
 
   }
@@ -184,7 +185,7 @@ function FileBrowser({ location, refresh, enterFolder }) {
           </Table>
         </TableContainer>
 
-        <CopyMoveObjectModal copy={copy} curLocation={location} open={copyMoveModalOpen}
+        <CopyMoveObjectModal copy={copy} curLocation={location} open={copyMoveModalOpen} name={copyMoveObjectName}
                              handleClose={closeCopyMoveModal} handleSubmit={copyMoveObject}
                              options={copy ? options : options.filter(opt => opt.text !== location)} />
       </>

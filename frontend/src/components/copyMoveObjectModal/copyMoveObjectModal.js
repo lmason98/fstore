@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
   Button,
   Dialog,
@@ -10,17 +10,16 @@ import {
   MenuItem,
   Select
 } from '@mui/material'
-import api from "../../utils/api";
 
 
-function CopyMoveObjectModal({ copy, curLocation, options, open, handleClose, handleSubmit }) {
+function CopyMoveObjectModal({ copy, curLocation, options, name, open, handleClose, handleSubmit }) {
   const [newLocation, setNewLocation] = useState('')
 
   const handleChange = (e) => setNewLocation(e.target.value)
 
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth='sm'>
-      <DialogTitle>{copy ? 'Copy' : 'Move'}</DialogTitle>
+      <DialogTitle>{copy ? `Copy ${name}` : `Move ${name}`}</DialogTitle>
       <DialogContent>
         <DialogContentText sx={{mb: 2}}>Current location: {curLocation}</DialogContentText>
         <FormControl fullWidth>

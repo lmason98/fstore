@@ -88,7 +88,7 @@ function Content() {
 
           {/* File browser */}
           <Grid item mt={5}><Typography variant='h4'>My Files: {location}</Typography></Grid>
-          <Grid item mt={5}>
+          <Grid item mt={5} sx={{maxHeight: `calc(100vh - 300px)`, overflowY: 'auto'}}>
             <FileBrowser location={location} refresh={refreshFileBrowser} enterFolder={enterFolder} />
           </Grid>
         </Grid>

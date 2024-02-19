@@ -1,0 +1,49 @@
+name: Build to ACR and deploy to AKS
+
+env:
+  AZURE_CONTAINER_REGISTRY: fstorecontainer
+  PROJECT_NAME: fstore
+  RESOURCE_GROUP: fstore
+  REGISTRY_URL: fstorecontainer.azurecr.io
+
+on:
+  # Only allow to run manually
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Build image on ACR
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.REGISTRY_URL }}
+        username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
+        password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
+    - run: |
+        docker build -t ${{ env.REGISTRY_URL }}/api-${{ env.PROJECT_NAME }}:${{ github.sha }} ./api
+        docker push ${{ env.REGISTRY_URL }}/api-${{ env.PROJECT_NAME }}:${{ github.sha }}
+        docker build -t ${{ env.REGISTRY_URL }}/front-${{ env.PROJECT_NAME }}:${{ github.sha }} -f ./nginx/Dockerfile.prod .
+        docker push ${{ env.REGISTRY_URL }}/front-${{ env.PROJECT_NAME }}:${{ github.sha }}
+    - env:
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        DEBUG: 0
+        ALLOWED_HOSTS: fstore
+        CSRF_TRUSTED_ORIGINS: "http://localhost:8000"
+        SQL_ENGINE: ${{ secrets.SQL_ENGINE }}
+        SQL_DATABASE: ${{ secrets.SQL_DATABASE }}
+        SQL_USER: ${{ secrets.SQL_USER }}
+        SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+        SQL_HOST: ${{ secrets.SQL_HOST }}
+        SQL_PORT: ${{ secrets.SQL_PORT }}
+        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+

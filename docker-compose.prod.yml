@@ -17,7 +17,7 @@ services:
       context: .
       dockerfile: ./nginx/Dockerfile.prod
     ports:
-      - "8000:80"
+      - 8000:80
     volumes:
       - static_volume:/api/staticfiles
     depends_on:

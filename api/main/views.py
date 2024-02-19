@@ -111,6 +111,9 @@ class FileView(BaseAPIView):
 		'jpg': 'image/jpg',
 		'jpeg': 'image/jpg',
 		'pdf': 'application/pdf',
+		'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+		'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+		'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 	}
 
 	def get(self, request, *args, **kwargs):

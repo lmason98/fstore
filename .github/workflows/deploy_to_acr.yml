@@ -1,4 +1,4 @@
-name: Build to ACR and deploy to AKS
+name: Build to ACR
 
 env:
   AZURE_CONTAINER_REGISTRY: fstorecontainer
